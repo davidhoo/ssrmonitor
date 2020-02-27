@@ -36,9 +36,8 @@ to quickly create a Cobra application.`,
 	Run: func(cmd *cobra.Command, args []string) {
 
 		fmt.Println("feng called")
-		strFeeds := getFengHostFeed("")
-		strFeeds = Decode(strFeeds)
-		feeds := strings.Split(strFeeds, "\n")
+
+		feeds := getFengHostFeed("")
 		for _, strFeed := range feeds {
 			s := Parse(strFeed)
 			st := s.Ping()
@@ -47,12 +46,13 @@ to quickly create a Cobra application.`,
 	},
 }
 
-func getFengHostFeed(url string) string {
+func getFengHostFeed(url string) []string {
 	b, err := ioutil.ReadFile("./ssglobal.feed")
 	if err != nil {
-		return ""
+		return nil
 	}
-	return string(b)
+	strurls := Decode(string(b))
+	return strings.Split(strurls, "\n")
 }
 
 func init() {
