@@ -19,7 +19,9 @@ import (
 	"fmt"
 	"io/ioutil"
 	"strings"
+	"sync"
 
+	"github.com/logrusorgru/aurora"
 	"github.com/spf13/cobra"
 )
 
@@ -36,18 +38,33 @@ to quickly create a Cobra application.`,
 	Run: func(cmd *cobra.Command, args []string) {
 
 		fmt.Println("feng called")
-
 		feeds := getFengHostFeed("")
+		var wg sync.WaitGroup
 		for _, strFeed := range feeds {
 			s := Parse(strFeed)
-			st := s.Ping()
-			fmt.Println(st.Addr, st.AvgRtt, st.StdDevRtt, st.PacketLoss, s.Remarks)
+			wg.Add(1)
+			go func() {
+				st, err := s.Ping()
+				if err != nil {
+
+					fmt.Println(s.EmojiFlag(), aurora.Red(s.Remarks), aurora.Red(s.Server), aurora.Red(err))
+				} else {
+					if st.PacketLoss == 100 {
+						fmt.Printf("%s "+aurora.Red("%s %s los:%d\n").String(), s.EmojiFlag(), s.Remarks, s.Server, int(st.PacketLoss))
+					} else {
+						fmt.Println(s.EmojiFlag(), s.Remarks, s.Server, "AvgRtt:", aurora.Green(st.AvgRtt), "StdDevRtt:", st.StdDevRtt, "los:", st.PacketLoss)
+					}
+				}
+				wg.Done()
+			}()
 		}
+		wg.Wait()
+		fmt.Println("========== done =============")
 	},
 }
 
 func getFengHostFeed(url string) []string {
-	b, err := ioutil.ReadFile("./ssglobal.feed")
+	b, err := ioutil.ReadFile("./feng.feed")
 	if err != nil {
 		return nil
 	}

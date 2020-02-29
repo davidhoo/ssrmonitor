@@ -42,16 +42,26 @@ type SSR struct {
 }
 
 // Ping server
-func (s *SSR) Ping() *ping.Statistics {
+func (s *SSR) Ping() (*ping.Statistics, error) {
 	pinger, err := ping.NewPinger(s.Server)
 	if err != nil {
-		panic(err)
+		return new(ping.Statistics), err
 	}
 	pinger.Timeout = 10000000000
 	pinger.Count = 5
 	pinger.Run()
 	st := pinger.Statistics()
-	return st
+	return st, nil
+}
+
+// EmojiFlag is return emoji flag
+func (s *SSR) EmojiFlag() string {
+	for c, f := range EmojiFlags {
+		if strings.Contains(s.Remarks, c) {
+			return f + " "
+		}
+	}
+	return UnknownEmojiFlag
 }
 
 // Parse ssr url
