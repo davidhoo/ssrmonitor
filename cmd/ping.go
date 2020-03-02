@@ -35,7 +35,6 @@ var pingCmd = &cobra.Command{
 	Use:   "ping",
 	Short: "Ping all SSR servers and sorting them",
 	Long:  `Ping all SSR servers and sorting them.`,
-	// Args:  cobra.MinimumNArgs(1),
 	Run: func(cmd *cobra.Command, args []string) {
 
 		feedURLs := viper.GetStringSlice("urls")
@@ -48,9 +47,7 @@ var pingCmd = &cobra.Command{
 				cmd.Usage()
 			}
 		}
-		// else {
-		// 	feedURL = feedURLs[0]
-		// }
+
 		for _, feedURL := range feedURLs {
 
 			feeds, err := getFengHostFeed(feedURL)
