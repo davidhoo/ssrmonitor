@@ -15,7 +15,9 @@ limitations under the License.
 */
 package main
 
-import "ssrmonitor/cmd"
+import (
+	"ssrmonitor/cmd"
+)
 
 func main() {
 	cmd.Execute()

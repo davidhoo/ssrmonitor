@@ -17,11 +17,31 @@ package cmd
 
 import (
 	"encoding/base64"
+	"fmt"
 	"net/url"
 	"strings"
+	"time"
 
 	"github.com/sparrc/go-ping"
 )
+
+// SSRs is SSR collection
+type SSRs []SSR
+
+// Len is Len()
+func (s SSRs) Len() int {
+	return len(s)
+}
+
+// Less 按照返回平均时间升序
+func (s SSRs) Less(i, j int) bool {
+	return s[i].AvgRtt < s[j].AvgRtt
+}
+
+// Swap 交换两个数据
+func (s SSRs) Swap(i, j int) {
+	s[i], s[j] = s[j], s[i]
+}
 
 // SSR struct
 type SSR struct {
@@ -39,6 +59,10 @@ type SSR struct {
 	ObfsParam     string
 	ProtocolParam string
 	Remarks       string
+	AvgRtt        time.Duration
+	StdDevRtt     time.Duration
+	PacketLoss    float64
+	RawURL        string
 }
 
 // Ping server
@@ -47,7 +71,7 @@ func (s *SSR) Ping() (*ping.Statistics, error) {
 	if err != nil {
 		return new(ping.Statistics), err
 	}
-	pinger.Timeout = 10000000000
+	pinger.Timeout = time.Second * 5
 	pinger.Count = 5
 	pinger.Run()
 	st := pinger.Statistics()
@@ -58,24 +82,29 @@ func (s *SSR) Ping() (*ping.Statistics, error) {
 func (s *SSR) EmojiFlag() string {
 	for c, f := range EmojiFlags {
 		if strings.Contains(s.Remarks, c) {
-			return f + " "
+			return f
 		}
 	}
 	return UnknownEmojiFlag
 }
 
 // Parse ssr url
-func Parse(rawurl string) *SSR {
+func Parse(rawurl string) (*SSR, error) {
+	if rawurl == "" {
+		return nil, fmt.Errorf("url is empty")
+	}
 	ssr := new(SSR)
 	u, _ := url.Parse(rawurl)
+
 	switch u.Scheme {
 	case "ss":
 		ssr = parseSS(u)
 	case "ssr":
 		ssr = parseSSR(u)
 	}
+	ssr.RawURL = rawurl
 
-	return ssr
+	return ssr, nil
 }
 
 func parseSS(u *url.URL) *SSR {
@@ -116,6 +145,7 @@ func parseAuthority(authority string) (method string, password string) {
 	return methodAndPassword[0], methodAndPassword[1]
 }
 
+// Decode is base64 decoder
 func Decode(rawstr string) string {
 	s, _ := base64.RawURLEncoding.DecodeString(rawstr)
 	return string(s)
