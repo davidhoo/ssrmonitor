@@ -152,7 +152,6 @@ func Decode(rawstr string) string {
 }
 
 func parsePlugin(rowplugin string) (plugin string, obfs string, obfshost string) {
-	// var plugin, obfs, obfshost string
 	params := strings.Split(rowplugin, ";")
 
 	if len(params) > 0 {

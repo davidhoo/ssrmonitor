@@ -30,7 +30,7 @@ import (
 	"github.com/spf13/viper"
 )
 
-// fengCmd represents the feng command
+// pingCmd represents the feng command
 var pingCmd = &cobra.Command{
 	Use:   "ping",
 	Short: "Ping all SSR servers and sorting them",
@@ -110,7 +110,7 @@ func getFengHostFeed(url string) ([]string, error) {
 		return nil, err
 	}
 	if len(strings.TrimSpace(string(b))) == 0 {
-		return nil, fmt.Errorf("%s has not content returned.(%s)", url)
+		return nil, fmt.Errorf("url has not content returned.(%s)", url)
 	}
 	defer res.Body.Close()
 
@@ -120,10 +120,6 @@ func getFengHostFeed(url string) ([]string, error) {
 }
 
 func init() {
-
-	// pingCmd.PersistentFlags().StringVar(&Url, "url", "", "ssr subscribe url")
-	// pingCmd.ArgsLenAtDash()
-
 	rootCmd.AddCommand(pingCmd)
 
 	// Here you will define your flags and configuration settings.
