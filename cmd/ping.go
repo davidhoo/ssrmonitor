@@ -16,8 +16,9 @@ limitations under the License.
 package cmd
 
 import (
+	"bytes"
 	"fmt"
-	"io/ioutil"
+	"log"
 	"net/http"
 	"sort"
 	"strings"
@@ -28,6 +29,8 @@ import (
 	"github.com/rodaine/table"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
+	"github.com/vbauerster/mpb"
+	"github.com/vbauerster/mpb/decor"
 )
 
 // pingCmd represents the feng command
@@ -49,8 +52,8 @@ var pingCmd = &cobra.Command{
 		}
 
 		for _, feedURL := range feedURLs {
-
 			feeds, err := getFengHostFeed(feedURL)
+
 			if err != nil {
 				cmd.PrintErrf("Error: %s\n", err)
 				cmd.Usage()
@@ -58,7 +61,9 @@ var pingCmd = &cobra.Command{
 			}
 			var wg sync.WaitGroup
 			var ss SSRs
+			log.Println("pinging ...")
 			for _, strFeed := range feeds {
+
 				s, err := Parse(strFeed)
 				if err != nil {
 					continue
@@ -82,6 +87,7 @@ var pingCmd = &cobra.Command{
 				}()
 			}
 			wg.Wait()
+			log.Println("sorting ...")
 
 			sort.Sort(ss)
 
@@ -98,25 +104,58 @@ var pingCmd = &cobra.Command{
 }
 
 func getFengHostFeed(url string) ([]string, error) {
+	fmt.Printf("Downloading...\n%s\n", url)
+
+	p := mpb.New(mpb.WithWidth(64))
+	var total int64
+	bar := p.AddBar(
+		total,
+		mpb.PrependDecorators(decor.Counters(decor.UnitKiB, "% .1f / % .1f")),
+		mpb.AppendDecorators(decor.Percentage()),
+	)
 
 	res, err := http.Get(url)
 	if err != nil {
 		return nil, err
 	}
 
-	b, err := ioutil.ReadAll(res.Body)
+	buf := make([]byte, 1024)
+	var f bytes.Buffer
+	for {
+		n, err := res.Body.Read(buf)
+		if err != nil || n == 0 {
+			break
+		}
+		f.Write(buf[:n])
 
-	if err != nil {
-		return nil, err
+		total += int64(n)
+		bar.SetTotal(total+1024, false)
+		bar.IncrBy(n)
 	}
-	if len(strings.TrimSpace(string(b))) == 0 {
-		return nil, fmt.Errorf("url has not content returned.(%s)", url)
-	}
+	bar.SetTotal(total, true)
+	p.Wait()
 	defer res.Body.Close()
-
-	strurls := Decode(string(b))
-
+	strurls := Decode(string(f.Bytes()))
 	return strings.Split(strurls, "\n"), nil
+	/*
+		res, err := http.Get(url)
+		if err != nil {
+			return nil, err
+		}
+
+		b, err := ioutil.ReadAll(res.Body)
+
+		if err != nil {
+			return nil, err
+		}
+		if len(strings.TrimSpace(string(b))) == 0 {
+			return nil, fmt.Errorf("url has not content returned.(%s)", url)
+		}
+		defer res.Body.Close()
+
+		strurls := Decode(string(b))
+
+		return strings.Split(strurls, "\n"), nil */
 }
 
 func init() {

@@ -130,12 +130,16 @@ func parseSSR(u *url.URL) *SSR {
 	ssr.Protocol = segs[2]
 	ssr.Method = segs[3]
 	ssr.Obfs = segs[4]
-	ssr.Password = Decode(strings.TrimRight(segs[5], "/"))
-	query, _ := url.ParseQuery(urlsegments[1])
-	ssr.Group = Decode(query.Get("group"))
-	ssr.ObfsParam = Decode(query.Get("obfsparam"))
-	ssr.ProtocolParam = Decode(query.Get("protoparam"))
-	ssr.Remarks = Decode(query.Get("remarks"))
+	if len(segs) > 5 {
+		ssr.Password = Decode(strings.TrimRight(segs[5], "/"))
+	}
+	if len(urlsegments) > 1 {
+		query, _ := url.ParseQuery(urlsegments[1])
+		ssr.Group = Decode(query.Get("group"))
+		ssr.ObfsParam = Decode(query.Get("obfsparam"))
+		ssr.ProtocolParam = Decode(query.Get("protoparam"))
+		ssr.Remarks = Decode(query.Get("remarks"))
+	}
 	return ssr
 }
 
