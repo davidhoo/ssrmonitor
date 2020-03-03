@@ -16,8 +16,9 @@ limitations under the License.
 package cmd
 
 import (
+	"bytes"
 	"fmt"
-	"io/ioutil"
+	"log"
 	"net/http"
 	"sort"
 	"strings"
@@ -98,25 +99,45 @@ var pingCmd = &cobra.Command{
 }
 
 func getFengHostFeed(url string) ([]string, error) {
-
+	fmt.Printf("Downloading...\n%s\n", url)
 	res, err := http.Get(url)
 	if err != nil {
 		return nil, err
 	}
 
-	b, err := ioutil.ReadAll(res.Body)
-
-	if err != nil {
-		return nil, err
-	}
-	if len(strings.TrimSpace(string(b))) == 0 {
-		return nil, fmt.Errorf("url has not content returned.(%s)", url)
+	buf := make([]byte, 1024)
+	var f bytes.Buffer
+	for {
+		n, err := res.Body.Read(buf)
+		if err != nil || n == 0 {
+			break
+		}
+		f.Write(buf[:n])
 	}
 	defer res.Body.Close()
 
-	strurls := Decode(string(b))
-
+	strurls := Decode(string(f.Bytes()))
+	log.Println("Download done")
 	return strings.Split(strurls, "\n"), nil
+
+	// res, err := http.Get(url)
+	// if err != nil {
+	// 	return nil, err
+	// }
+
+	// b, err := ioutil.ReadAll(res.Body)
+
+	// if err != nil {
+	// 	return nil, err
+	// }
+	// if len(strings.TrimSpace(string(b))) == 0 {
+	// 	return nil, fmt.Errorf("url has not content returned.(%s)", url)
+	// }
+	// defer res.Body.Close()
+
+	// strurls := Decode(string(b))
+
+	// return strings.Split(strurls, "\n"), nil
 }
 
 func init() {
