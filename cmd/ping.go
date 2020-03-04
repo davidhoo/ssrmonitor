@@ -137,25 +137,6 @@ func getFengHostFeed(url string) ([]string, error) {
 	defer res.Body.Close()
 	strurls := Decode(string(f.Bytes()))
 	return strings.Split(strurls, "\n"), nil
-	/*
-		res, err := http.Get(url)
-		if err != nil {
-			return nil, err
-		}
-
-		b, err := ioutil.ReadAll(res.Body)
-
-		if err != nil {
-			return nil, err
-		}
-		if len(strings.TrimSpace(string(b))) == 0 {
-			return nil, fmt.Errorf("url has not content returned.(%s)", url)
-		}
-		defer res.Body.Close()
-
-		strurls := Decode(string(b))
-
-		return strings.Split(strurls, "\n"), nil */
 }
 
 func init() {
