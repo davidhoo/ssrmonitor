@@ -27,7 +27,7 @@ var versionCmd = &cobra.Command{
 	Short: "Print the version number of ssrmonitor",
 	Long:  `Print the version number of ssrmonitor`,
 	Run: func(cmd *cobra.Command, args []string) {
-		fmt.Println("version v0.0.2")
+		fmt.Println("version v0.0.3")
 	},
 }
 
