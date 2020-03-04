@@ -30,13 +30,11 @@ var cfgFile string
 // rootCmd represents the base command when called without any subcommands
 var rootCmd = &cobra.Command{
 	Use:   "ssrmonitor",
-	Short: "A brief description of your application",
-	Long: `A longer description that spans multiple lines and likely contains
-examples and usage of using your application. For example:
-
-Cobra is a CLI library for Go that empowers applications.
-This application is a tool to generate the needed files
-to quickly create a Cobra application.`,
+	Short: "ssrmonitor 用来解析rss订阅，对可用节点Ping数据排序",
+	Long: `ssrmonitor 用来解析rss订阅，对可用节点Ping数据排序：
+可以使用配置文件管理多个SSR订阅，也可以灵活的使用参数指定一个SSR订阅节点。
+ssrmonitor 会解析SSR数据并Ping 每一个节点，然后分析。
+	`,
 	// Uncomment the following line if your bare application
 	// has an action associated with it:
 	//	Run: func(cmd *cobra.Command, args []string) { },
@@ -62,7 +60,7 @@ func init() {
 
 	// Cobra also supports local flags, which will only run
 	// when this action is called directly.
-	rootCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
+	// rootCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
 }
 
 // initConfig reads in config file and ENV variables if set.
