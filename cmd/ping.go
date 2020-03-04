@@ -17,6 +17,7 @@ package cmd
 
 import (
 	"bytes"
+	"errors"
 	"fmt"
 	"log"
 	"net/http"
@@ -35,20 +36,33 @@ import (
 
 // pingCmd represents the feng command
 var pingCmd = &cobra.Command{
-	Use:   "ping",
+	Use:   "ping [ssr subscribe url]",
 	Short: "Ping all SSR servers and sorting them",
 	Long:  `Ping all SSR servers and sorting them.`,
+	Args: func(cmd *cobra.Command, args []string) error {
+		c := len(args)
+		if c == 1 {
+			return nil
+		} else if c > 1 {
+			return errors.New(fmt.Sprintf("accepts 1 arg(s), received %d\n", c))
+		}
+		err := viper.ReadInConfig()
+		if err != nil {
+			return err
+		}
+		feedUrls := viper.GetStringSlice("urls")
+		if len(feedUrls) < 1 {
+			return errors.New("missing configuration for 'configPath'")
+		}
+		return nil
+	},
 	Run: func(cmd *cobra.Command, args []string) {
 
-		feedURLs := viper.GetStringSlice("urls")
-		if len(feedURLs) < 1 {
-			cmd.Args = cobra.MinimumNArgs(1)
-			if len(args) > 0 {
-				feedURLs = append(feedURLs, args[0])
-			} else {
-				cmd.PrintErrln("Error: requires at least 1 arg(s), only received 0")
-				cmd.Usage()
-			}
+		var feedURLs []string
+		if len(args) == 1 {
+			feedURLs = args
+		} else {
+			feedURLs = viper.GetStringSlice("urls")
 		}
 
 		for _, feedURL := range feedURLs {
@@ -137,25 +151,6 @@ func getFengHostFeed(url string) ([]string, error) {
 	defer res.Body.Close()
 	strurls := Decode(string(f.Bytes()))
 	return strings.Split(strurls, "\n"), nil
-	/*
-		res, err := http.Get(url)
-		if err != nil {
-			return nil, err
-		}
-
-		b, err := ioutil.ReadAll(res.Body)
-
-		if err != nil {
-			return nil, err
-		}
-		if len(strings.TrimSpace(string(b))) == 0 {
-			return nil, fmt.Errorf("url has not content returned.(%s)", url)
-		}
-		defer res.Body.Close()
-
-		strurls := Decode(string(b))
-
-		return strings.Split(strurls, "\n"), nil */
 }
 
 func init() {
