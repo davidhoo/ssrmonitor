@@ -44,7 +44,7 @@ var pingCmd = &cobra.Command{
 		if c == 1 {
 			return nil
 		} else if c > 1 {
-			return errors.New(fmt.Sprintf("accepts 1 arg(s), received %d\n", c))
+			return fmt.Errorf("accepts 1 arg(s), received %d\n", c)
 		}
 		err := viper.ReadInConfig()
 		if err != nil {
@@ -70,8 +70,9 @@ var pingCmd = &cobra.Command{
 
 			if err != nil {
 				cmd.PrintErrf("Error: %s\n", err)
-				cmd.Usage()
-				return
+				if err := cmd.Usage(); err != nil {
+					return
+				}
 			}
 			var wg sync.WaitGroup
 			var ss SSRs
@@ -149,7 +150,7 @@ func getFengHostFeed(url string) ([]string, error) {
 	bar.SetTotal(total, true)
 	p.Wait()
 	defer res.Body.Close()
-	strurls := Decode(string(f.Bytes()))
+	strurls := Decode(f.String())
 	return strings.Split(strurls, "\n"), nil
 }
 
