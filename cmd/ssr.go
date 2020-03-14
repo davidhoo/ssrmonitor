@@ -22,7 +22,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/sparrc/go-ping"
+	"ssrmonitor/ping"
 )
 
 // SSRs is SSR collection
