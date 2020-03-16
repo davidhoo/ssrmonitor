@@ -13,7 +13,7 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 */
-package cmd
+package ssr
 
 import (
 	"encoding/base64"
@@ -22,6 +22,7 @@ import (
 	"strings"
 	"time"
 
+	"ssrmonitor/emojiflag"
 	"ssrmonitor/ping"
 )
 
@@ -80,12 +81,12 @@ func (s *SSR) Ping() (*ping.Statistics, error) {
 
 // EmojiFlag is return emoji flag
 func (s *SSR) EmojiFlag() string {
-	for c, f := range EmojiFlags {
+	for c, f := range emojiflag.EmojiFlags {
 		if strings.Contains(s.Remarks, c) {
 			return f
 		}
 	}
-	return UnknownEmojiFlag
+	return emojiflag.UnknownEmojiFlag
 }
 
 // Parse ssr url

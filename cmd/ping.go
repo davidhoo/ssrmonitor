@@ -22,6 +22,7 @@ import (
 	"log"
 	"net/http"
 	"sort"
+	"ssrmonitor/ssr"
 	"strings"
 	"sync"
 
@@ -75,11 +76,11 @@ var pingCmd = &cobra.Command{
 				}
 			}
 			var wg sync.WaitGroup
-			var ss SSRs
+			var ss ssr.SSRs
 			log.Println("pinging ...")
 			for _, strFeed := range feeds {
 
-				s, err := Parse(strFeed)
+				s, err := ssr.Parse(strFeed)
 				if err != nil {
 					continue
 				}
@@ -150,7 +151,7 @@ func getFengHostFeed(url string) ([]string, error) {
 	bar.SetTotal(total, true)
 	p.Wait()
 	defer res.Body.Close()
-	strurls := Decode(f.String())
+	strurls := ssr.Decode(f.String())
 	return strings.Split(strurls, "\n"), nil
 }
 
