@@ -4,7 +4,7 @@ go 1.13
 
 require (
 	github.com/InVisionApp/tabular v0.3.0 // indirect
-	github.com/davidhoo/go-ping v0.0.0-20200314051831-7b9541a97afd
+	github.com/davidhoo/go-ping v0.0.0-20200314051831-7b9541a97afd // indirect
 	github.com/fatih/color v1.9.0
 	github.com/fsnotify/fsnotify v1.4.9 // indirect
 	github.com/jroimartin/gocui v0.4.0 // indirect
