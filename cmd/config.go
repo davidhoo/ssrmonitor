@@ -17,20 +17,39 @@ package cmd
 
 import (
 	"fmt"
+	"os"
 	"strconv"
 	"strings"
 
 	"github.com/fatih/color"
+	homedir "github.com/mitchellh/go-homedir"
 	"github.com/rodaine/table"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 )
+
+func checkConfig() {
+	if err := viper.ReadInConfig(); err != nil {
+		home, err := homedir.Dir()
+		if err != nil {
+			fmt.Println(err)
+			os.Exit(1)
+		} else {
+
+			if err := viper.WriteConfigAs(home + "/.ssrmonitor.yaml"); err != nil {
+				fmt.Print(err)
+				os.Exit(1)
+			}
+		}
+	}
+}
 
 // configCmd represents the config command
 var configCmd = &cobra.Command{
 	Use:   "config",
 	Short: "Configure the ssr feed",
 	Run: func(cmd *cobra.Command, args []string) {
+		checkConfig()
 		printConfig()
 	},
 }
@@ -40,6 +59,7 @@ var addCmd = &cobra.Command{
 	Short: "Add new ssr feed into config file",
 	Args:  cobra.ExactArgs(1),
 	Run: func(cmd *cobra.Command, args []string) {
+		checkConfig()
 		urls := viper.GetStringSlice("urls")
 		urls = append(urls[:], strings.TrimSpace(args[0]))
 		viper.Set("urls", urls)
@@ -62,11 +82,13 @@ var deleteCmd = &cobra.Command{
 		return nil
 	},
 	Run: func(cmd *cobra.Command, args []string) {
-		idx, err := strconv.ParseInt(args[0], 10, 32)
-		if err != nil {
-			cmd.PrintErrln(err)
-		}
+		idx, _ := strconv.ParseInt(args[0], 10, 32)
 		urls := viper.GetStringSlice("urls")
+		if int(idx) >= len(urls) || int(idx) < 0 {
+			cmd.PrintErrf("Error: %v is not a valid index\n", idx)
+			_ = cmd.Usage()
+			os.Exit(1)
+		}
 		urls = append(urls[0:idx], urls[idx+1:]...)
 		viper.Set("urls", urls)
 		_ = viper.WriteConfig()
