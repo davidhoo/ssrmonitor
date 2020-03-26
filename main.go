@@ -16,14 +16,9 @@ limitations under the License.
 package main
 
 import (
-	"net/http"
-	_ "net/http/pprof"
 	"ssrmonitor/cmd"
 )
 
 func main() {
-	go func() {
-		http.ListenAndServe("0.0.0.0:6060", nil)
-	}()
 	cmd.Execute()
 }
